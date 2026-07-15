@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "finance-app",
+	"upload_source_maps": true,
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "finance-db",
+			"database_id": "2fd7c525-708f-45cd-a093-81b1bedfc137"
+		}
+	]
+}
