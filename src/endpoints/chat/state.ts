@@ -5,7 +5,7 @@ import { ChatState } from "../../types/chat-state";
 export async function state(context: ChatContext) {
   const expiredDate = new Date(Date.now() - CHAT_STATE_EXPIRATION_MINUTES * 60 * 1000).toISOString();
 
-  const { data, error } = await context.supabase
+  const { data: record, error } = await context.supabase
     .from("chat_states")
     .select("*")
     .eq("chat_id", context.chatId)
@@ -15,8 +15,8 @@ export async function state(context: ChatContext) {
   if (error) {
     console.error("Error fetching state:", error);
   }
-console.log(`State Id: ${data?.id}, Flow: ${data?.flow}, Step: ${data?.step}, Updated At: ${data?.updated_at}`);
-  context.state = data || {
+  console.log(`State Id: ${record?.id}, Flow: ${record?.flow}, Step: ${record?.step}, Updated At: ${record?.updated_at}`);
+  context.state = record || {
     data: {},
   };
   return context;

@@ -16,6 +16,6 @@ app.onError((err, c) => {
 	);
 });
 
-// app.route("/chat", chatRouter);
+app.route("/chat", chatRouter);
 
 export default app;

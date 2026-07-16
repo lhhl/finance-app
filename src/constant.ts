@@ -7,20 +7,7 @@ export enum FLOW_COMMANDS {
   EDIT_FUND = "/suanguontien",
   DELETE_FUND = "/xoanguontien",
 }
-export const CUD_TELEGRAM_BUTTONS = [
-  {
-    text: "Thêm",
-    callback_data: "/themnguontien"
-  },
-  {
-    text: "Sửa",
-    callback_data: "/suanguontien"
-  },
-  {
-    text: "Xóa",
-    callback_data: "/xoanguontien"
-  }
-];
+
 export enum CALLBACK_COMMANDS {
   CONFIRM = "@xacnhan",
   CANCEL = "@huy",

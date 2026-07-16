@@ -26,6 +26,11 @@ export async function chat(c: Context) {
 		supabase: await createSupabaseContext(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_ROLE_KEY),
 	});
 
+	if (chatContext.state?.id && text.startsWith("/")) {
+		await chatContext.sendMessage("⛔ Vui lòng hoàn thành tiến trình hiện tại trước khi thực hiện lệnh mới.");
+		return c.json({ ok: true });
+	}
+
 	const commandText = chatContext.state?.flow || text;
 
 	if (commandText.startsWith("/")) {

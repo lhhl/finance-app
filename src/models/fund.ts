@@ -1,24 +1,33 @@
-import { Fund } from "../types/fund";
-import { calculateDaysUntilMaturity, calculateDaysUntilStatement, calculateMaturityDate, calculateStatementDate } from "../utils/calculation";
+import { calculateMaturityDate, calculateStatementDate, calculateDaysUntilStatement, calculateDaysUntilMaturity } from "../utils/calculation";
 import { formatCurrency, formatDate } from "../utils/format";
 
-export class FundModel {
-  fund: Fund;
+export class Fund {
+  id: string;
+  _name: string;
+  _amount: number;
+  statement_day?: number;
+  maturity_day: number;
+  created_at: string;
 
   constructor(fund: Fund) {
-    this.fund = fund;
+    this.id = fund.id;
+    this._name = fund._name;
+    this._amount = fund._amount;
+    this.statement_day = fund.statement_day;
+    this.maturity_day = fund.maturity_day;
+    this.created_at = fund.created_at || new Date().toISOString();
   }
 
   get name(): string {
-    return this.fund.name.toUpperCase();
+    return this._name.toUpperCase();
   }
 
   get amount(): string {
-    return formatCurrency(this.fund.amount);
+    return formatCurrency(this._amount);
   }
 
   get maturity_date(): Date {
-    return calculateMaturityDate(this.fund.maturity_day);
+    return calculateMaturityDate(this.maturity_day);
   }
 
   get maturity_date_string(): string {
@@ -26,8 +35,8 @@ export class FundModel {
   }
 
   get statement_date(): Date | undefined {
-    if (!this.fund.statement_day) return undefined;
-    return calculateStatementDate(this.fund.statement_day, this.fund.maturity_day - this.fund.statement_day, this.maturity_date!);
+    if (!this.statement_day) return undefined;
+    return calculateStatementDate(this.statement_day, this.maturity_day - this.statement_day, this.maturity_date!);
   }
 
   get statement_date_string(): string | undefined {

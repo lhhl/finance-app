@@ -1,7 +1,6 @@
 import { ChatContext } from "../../../types/chat-context";
-import { Fund } from "../../../types/fund";
 import { createFundMessage } from "../message-template";
-import { FundModel } from "../../../models/fund";
+import { Fund } from "../../../models/fund";
 
 export async function fund(_text: string, context: ChatContext) {
   console.log('Executing flows: fund');
@@ -11,22 +10,28 @@ export async function fund(_text: string, context: ChatContext) {
     .select("*")
     .order("name");
 
-  const message = data?.map((fund: Fund, i) => {
-    return createFundMessage(new FundModel(fund), i + 1);
-  })?.join("\n") || "No funds found.";
-
-  await context.sendMessage(message, [
+  const message = data?.map((fund, i) => {
+    return createFundMessage(new Fund(fund), i + 1);
+  })?.join("\n") || "Không có nguồn tiền nào.";
+  const buttons = [
     {
       text: "Thêm",
       callback_data: "/themnguontien"
     },
-    {
-      text: "Sửa",
-      callback_data: "/suanguontien"
-    },
-    {
-      text: "Xóa",
-      callback_data: "/xoanguontien"
-    }
-  ]);
+  ];
+
+  if (data?.length) {
+    buttons.push(
+      {
+        text: "Sửa",
+        callback_data: "/suanguontien"
+      },
+      {
+        text: "Xóa",
+        callback_data: "/xoanguontien"
+      }
+    );
+  }
+
+  await context.sendMessage(message, buttons);
 }
