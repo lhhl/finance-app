@@ -1,6 +1,7 @@
 import { ChatContext } from "../../../../types/chat-context";
 import { FlowStepResult } from "../../../../types/flow";
 import { AddFundRequest } from "../../../../models/add-fund-request";
+import { Fund } from "../../../../models/fund";
 import { createAddFundMessage, createConfirmAddFundMessage, createErrorMessage, createSuccessMessage, createErrorInputMessage, createSelectFundMessage, createEditFundMessage, createNotFoundMessage, createInvalidInputMessage, createConfirmMessage } from "../../../../utils/message-template";
 import { generateConfirmButtons } from "../../../../utils/generate";
 import { Flow } from "../flow";
@@ -19,10 +20,14 @@ export class DeleteFundFlow extends Flow {
     this.fundRepository = new FundRepository(context.supabase);
   }
 
-  private async showFundList(): Promise<FlowStepResult> {
+  private async getFundList(): Promise<Fund[]> {
     const funds = await this.fundRepository.list();
-    const filteredFunds = funds.filter(fund => fund.totalDebtAmount == 0);
-    if (!filteredFunds.length) {
+    return funds.filter(fund => fund.totalDebtAmount == 0);
+  }
+
+  private async showFundList(): Promise<FlowStepResult> {
+    const funds = await this.getFundList();
+    if (!funds.length) {
       return {
         success: true,
         stepAdded: 10,
@@ -31,12 +36,12 @@ export class DeleteFundFlow extends Flow {
     }
     return {
       success: true,
-      messages: [createSelectFundMessage(filteredFunds)],
+      messages: [createSelectFundMessage(funds)],
     };
   }
 
   private async selectFundStep(): Promise<FlowStepResult> {
-    const funds = await this.fundRepository.list();
+    const funds = await this.getFundList();
     const request = new SelectIdRequest(this.text, funds.length);
     const rs = request.validate();
     if (!rs.isValid) {
