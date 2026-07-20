@@ -8,13 +8,14 @@ import { DebtAllocationFlow } from "./debt/debt-allocation-flow";
 import { ViewChargeFeeFlow } from "./setting/view-charge-fee-flow";
 import { RefinanceFundFlow } from "./fund/refinance-fund-flow";
 import { ContactDebtListFlow } from "./contact/contact-debt-list-flow";
+import { DeleteFundFlow } from "./fund/delete-fund-flow";
 
 export const FLOW_COMMANDS_LIST = {
   [FLOW_COMMANDS.LIST_FUND]: FundListFlow,
   [FLOW_COMMANDS.ADD_FUND]: AddFundFlow,
   [FLOW_COMMANDS.EDIT_FUND]: EditFundFlow,
   [FLOW_COMMANDS.DETAIL_FUND]: DetailFundFlow,
-  // [FLOW_COMMANDS.DELETE_FUND]: FundFlow,
+  [FLOW_COMMANDS.DELETE_FUND]: DeleteFundFlow,
   [FLOW_COMMANDS.DEBT_ALLOCATION]: DebtAllocationFlow,
   [FLOW_COMMANDS.VIEW_CHARGE_FEE]: ViewChargeFeeFlow,
   [FLOW_COMMANDS.CHANGE_CHARGE_FEE]: ChangeChargeFeeFlow,
