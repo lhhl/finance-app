@@ -12,5 +12,10 @@
 			"database_name": "finance-db",
 			"database_id": "2fd7c525-708f-45cd-a093-81b1bedfc137"
 		}
-	]
+	],
+	"triggers": {
+    "crons": [
+      "0 12 * * *"
+    ]
+  }
 }

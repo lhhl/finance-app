@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { chatRouter } from "./endpoints/chat/router";
+import { scheduled } from "./endpoints/cron";
 
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
@@ -18,4 +19,7 @@ app.onError((err, c) => {
 
 app.route("/chat", chatRouter);
 
-export default app;
+export default {
+	fetch: app.fetch,
+  scheduled,
+};

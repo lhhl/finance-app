@@ -5,6 +5,8 @@ import { assistant } from "./assistant";
 import { createMessageContext, createSupabaseContext } from "../../utils/action";
 import { ChatContext } from "../../types/chat-context";
 import { state } from "./state";
+import { createInvalidCommandMessage, createNoActiveFlowMessage } from "../../utils/message-template";
+import { attachExitButton } from "../../utils/generate";
 
 export async function chat(c: Context) {
 	const body = await c.req.json<TelegramMessagePayload>();
@@ -16,7 +18,8 @@ export async function chat(c: Context) {
 	console.log(`From ${senderId} in ${chatId}: ${text}`);
 
 	if (!chatId || !text) {
-		return c.json({ ok: false, error: "Missing chatId or text" });
+		console.error("Missing chatId or text in the request body.");
+		return;
 	}
 
 	const chatContext: ChatContext = await state({
@@ -27,8 +30,13 @@ export async function chat(c: Context) {
 	});
 
 	if (chatContext.state?.id && text.startsWith("/")) {
-		await chatContext.sendMessage("⛔ Vui lòng hoàn thành tiến trình hiện tại trước khi thực hiện lệnh mới.");
-		return c.json({ ok: true });
+		await chatContext.sendMessage(createInvalidCommandMessage(), attachExitButton());
+		return;
+	}
+
+	if (!chatContext.state?.id && text.startsWith("^")) {
+		await chatContext.sendMessage(createNoActiveFlowMessage(), attachExitButton());
+		return;
 	}
 
 	const commandText = chatContext.state?.flow || text;
@@ -39,5 +47,5 @@ export async function chat(c: Context) {
 		await assistant(text, chatContext);
 	}
 
-	return c.json({ ok: true });
+	return;
 }

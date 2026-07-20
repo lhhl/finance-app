@@ -1,4 +1,5 @@
-import Schema from 'validate'
+import validator from 'validator';
+import type { ValidationError } from '../types/error';
 import { BaseRequest } from './base-request';
 
 export class AddFundRequest extends BaseRequest {
@@ -6,42 +7,33 @@ export class AddFundRequest extends BaseRequest {
   amount: number;
   statement_day?: number;
   maturity_day: number;
-  interval_months?: number;
 
-  constructor(name: string, amount: number, maturity_day: number, statement_day?: number, interval_months?: number) {
+  constructor(name: string, amount: number, maturity_day: number, statement_day?: number) {
     super();
     this.name = name || "";
     this.amount = amount || 0;
     this.statement_day = statement_day;
     this.maturity_day = maturity_day || 15;
-    this.interval_months = interval_months || 1;
   }
 
-  getSchema(): Schema {
-    return new Schema({
-      name: {
-        type: String,
-        required: true,
-        message: "Tên nguồn tiền không được để trống."
+  validateFields(): ValidationError[]{
+    return [
+      {
+        valid: !validator.isEmpty(this.name),
+        message: "Tên nguồn tiền là bắt buộc."
       },
-      amount: {
-        type: Number,
-        required: true,
-        message: "Hạn mức (số tiền) không được để trống."
+      {
+        valid: validator.isInt(this.amount.toString(), { min: 1000 }),
+        message: "Số tiền phải lớn hơn 1000."
       },
-      maturity_day: {
-        type: Number,
-        required: true,
-        message: "Ngày đáo hạn không được để trống."
+      {
+        valid: validator.isInt(this.maturity_day.toString(), { min: 1, max: 30 }),
+        message: "Ngày đáo hạn phải từ 1 đến 30."
       },
-      statement_day: {
-        type: Number,
-        required: false
-      },
-      interval_months: {
-        type: Number,
-        required: false
+      {
+        valid: !this.statement_day || validator.isInt(this.statement_day.toString(), { min: 1, max: 30 }),
+        message: "Ngày sao kê phải từ 1 đến 30."
       }
-    });
+    ]
   }
 }

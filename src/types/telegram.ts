@@ -1,3 +1,5 @@
+import { CALLBACK_COMMANDS, FLOW_COMMANDS } from "../constant";
+
 export interface TelegramMessagePayload {
   update_id: number;
   message?: {
@@ -39,5 +41,5 @@ export interface TelegramMessagePayload {
 
 export interface TelegramButton {
   text: string;
-  callback_data: string;
+  callback_data: CALLBACK_COMMANDS | FLOW_COMMANDS;
 }

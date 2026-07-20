@@ -47,7 +47,11 @@ export async function updateState(state: ChatState, context: ChatContext) {
   }
 }
 
-export async function clearState(state: ChatState, context: ChatContext) {
+export async function clearState(context: ChatContext) {
+  if (!context.state?.id) {
+    console.log("No state to clear.");
+    return;
+  }
   const { data, error } = await context.supabase
     .from("chat_states")
     .delete()

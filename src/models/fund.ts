@@ -1,68 +1,142 @@
 import { calculateMaturityDate, calculateStatementDate, calculateDaysUntilStatement, calculateDaysUntilMaturity } from "../utils/calculation";
 import { formatCurrency, formatDate } from "../utils/format";
+import { Debt } from "./debt";
+import { Contact } from "./contact";
 
 export class Fund {
-  id: string;
-  _name: string;
-  _amount: number;
-  statement_day?: number;
+  id: number;
+  name: string;
+  amount: number;
+  statement_day: number;
   maturity_day: number;
-  created_at: string;
+  created_at: Date;
+  month_interval?: number;
+  refinance_date?: Date;
+  refinance_percent: number = 0;
+  debts?: Debt[];
 
   constructor(fund: Fund) {
     this.id = fund.id;
-    this._name = fund._name;
-    this._amount = fund._amount;
+    this.name = fund.name;
+    this.amount = fund.amount;
     this.statement_day = fund.statement_day;
     this.maturity_day = fund.maturity_day;
-    this.created_at = fund.created_at || new Date().toISOString();
+    this.created_at = new Date(fund.created_at);
+    this.month_interval = fund.month_interval;
+    this.debts = fund.debts ? fund.debts.map(debt => new Debt(debt)) : [];
+    this.refinance_date = fund.refinance_date ? new Date(fund.refinance_date) : undefined;
   }
 
-  get name(): string {
-    return this._name.toUpperCase();
+  get canRefinance(): boolean {
+    return this.totalStatementDebtAmount > 0 && this.untilStatementDays < 0;
   }
 
-  get amount(): string {
-    return formatCurrency(this._amount);
+  isAvailableForAmount(amount: number): boolean {
+    return this.avalableAmount >= amount && this.untilStatementDays < 0;
   }
 
-  get maturity_date(): Date {
+  get refinanceFee(): number {
+    return this.totalStatementDebtAmount * (this.refinance_percent / 100);
+  }
+
+  get formatedRefinanceFeeString(): string {
+    return formatCurrency(this.refinanceFee);
+  }
+
+  get isRefinanced(): boolean {
+    if (!this.refinance_date) return false;
+    return this.refinance_date > this.statementDate;
+  }
+
+  get formatedName(): string {
+    return this.name.toUpperCase();
+  }
+
+  get formatedAmount(): string {
+    return formatCurrency(this.amount);
+  }
+
+  get formatedAvalableAmount(): string {
+    return formatCurrency(this.avalableAmount);
+  }
+
+  get formatedTotalStatementDebtAmount(): string {
+    return formatCurrency(this.totalStatementDebtAmount);
+  }
+
+  get formatedTotalDebtAmount(): string {
+    return formatCurrency(this.totalDebtAmount);
+  }
+
+  get avalableAmount(): number {
+    return this.amount - this.totalDebtAmount;
+  }
+
+  get statementDebts(): Debt[] {
+    if (!this.debts) return [];
+    return this.debts.filter(debt => debt.created_at < this.statementDate);
+  }
+
+  get totalStatementDebtAmount(): number {
+    if (!this.statementDebts.length) return 0;
+    return this.statementDebts.reduce((sum, debt) => sum + debt.amount, 0);
+  }
+
+  get totalDebtAmount(): number {
+    if (!this.debts?.length) return 0;
+    return this.debts.reduce((sum, debt) => sum + debt.amount, 0);
+  }
+
+  get maturityDate(): Date {
     return calculateMaturityDate(this.maturity_day);
   }
 
-  get maturity_date_string(): string {
-    return formatDate(this.maturity_date);
+  get maturityDateString(): string {
+    return formatDate(this.maturityDate);
   }
 
-  get statement_date(): Date | undefined {
-    if (!this.statement_day) return undefined;
-    return calculateStatementDate(this.statement_day, this.maturity_day - this.statement_day, this.maturity_date!);
+  get statementDate(): Date {
+    return calculateStatementDate(this.statement_day, this.maturity_day - this.statement_day, this.maturityDate!);
   }
 
-  get statement_date_string(): string | undefined {
-    if (!this.statement_date) return undefined;
-    return formatDate(this.statement_date);
+  get statementDateString(): string {
+    return formatDate(this.statementDate);
   }
 
-  get until_statement_days(): number | undefined {
-    if (!this.statement_date) return undefined;
-    return calculateDaysUntilStatement(this.statement_date);
+  get untilStatementDays(): number {
+    return calculateDaysUntilStatement(this.statementDate);
   }
 
-  get until_maturity_days(): number {
-    return calculateDaysUntilMaturity(this.maturity_date);
+  get untilMaturityDays(): number {
+    return calculateDaysUntilMaturity(this.maturityDate);
   }
 
   get status(): string {
-    if (this.until_statement_days == undefined || this.until_statement_days <= 0) {
-      if (this.until_maturity_days > 0) {
-        return `🔵 Còn ${this.until_maturity_days} ngày đến ngày đáo hạn`;
-      } else if (this.until_maturity_days === 0) {
-        return "🔴 Đáo hạn hôm nay";
-      } else {
+    if (this.untilStatementDays <= 0) {
+      if (this.isRefinanced) {
         return "🟢 Đã đáo hạn";
       }
+      if (!this.canRefinance) {
+        return `🟤 Không cần đáo hạn`
+      }
+      if (this.untilMaturityDays > 0) {
+        return `🔵 Còn ${this.untilMaturityDays} ngày đến đáo hạn`;
+      } else if (this.untilMaturityDays === 0) {
+        return "🔴 Đáo hạn hôm nay";
+      } else {
+        return "🟣 Đã quá hạn";
+      }
     }
-    return `🟡 Còn ${this.until_statement_days} ngày đến ngày sao kê`;
+    return `🟡 Còn ${this.untilStatementDays} ngày đến sao kê`;
+  }
+
+  get statementDaysStatus(): string {
+    if (this.untilStatementDays > 0) {
+      return `Chưa đến sao kê`;
+    }
+    if (this.untilStatementDays === 0) {
+      return "Sao kê hôm nay";
+    }
+    return `Sao kê ${-this.untilStatementDays} ngày trước`;
   }
 }
