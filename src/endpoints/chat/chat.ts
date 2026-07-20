@@ -8,8 +8,7 @@ import { state } from "./state";
 import { createInvalidCommandMessage, createNoActiveFlowMessage } from "../../utils/message-template";
 import { attachExitButton } from "../../utils/generate";
 
-export async function chat(c: Context) {
-	const body = await c.req.json<TelegramMessagePayload>();
+export async function chat(c: Context, body: TelegramMessagePayload) {
 	console.log(body);
 
 	const senderId = body.message?.from?.id || body.callback_query?.from?.id;
