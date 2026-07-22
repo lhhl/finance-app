@@ -18,6 +18,10 @@ export class Contact {
     return this.debts.reduce((sum, debt) => sum + debt.amount, 0);
   }
 
+  get formatedTotalDebtAmount(): string {
+    return formatCurrency(this.totalDebtAmount);
+  }
+
   allocateDebtPayment(amount: number): { debtId: number; newAmount: number; }[] {
     let remainingAmount = amount;
     const allocations: { debtId: number; newAmount: number; }[] = [];

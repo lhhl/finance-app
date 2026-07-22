@@ -38,7 +38,7 @@ ${fund.debts!.map((debt) => `   👤 ${debt.debt_contacts!.name}: <b>${debt.form
 }
 
 export function createContactDebtMessage(contacts: Contact[]): string {
-  const template = contacts.map(contact => `👤 ${contact.name}: <b>${contact.totalDebtAmount}</b>`).join("\n");
+  const template = contacts.map(contact => `👤 ${contact.name}: <b>${contact.formatedTotalDebtAmount}</b>`).join("\n");
   return template;
 }
 

@@ -21,11 +21,6 @@ export async function chat(c: Context, body: TelegramMessagePayload) {
 		return;
 	}
 
-	if (![c.env.CONVERSATION_CHAT_ID, c.env.ADMIN_CHAT_ID].includes(chatId.toString())) {
-		console.error("Unauthorized chatId.");
-		return;
-	}
-
 	const chatContext: ChatContext = await state({
 		chatId,
 		authorId: senderId,
