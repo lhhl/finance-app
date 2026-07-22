@@ -55,6 +55,7 @@ export class DeleteFundFlow extends Flow {
     return {
       success: true,
       messages: [createConfirmMessage(`xóa nguồn tiền ${selectFund.formatedName} không`)],
+      buttons: generateConfirmButtons()
     };
   }
 

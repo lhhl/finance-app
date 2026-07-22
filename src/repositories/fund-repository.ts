@@ -1,6 +1,7 @@
 import { AddFundRequest } from "../models/add-fund-request";
 import { Fund } from "../models/fund";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { AddFeeChargeRequest } from "../models/add-fee-charge-request";
 
 export class FundRepository {
   tableName = "funds";
@@ -79,7 +80,7 @@ export class FundRepository {
     return true;
   }
 
-  async refinance(fundId: number, sourceId: number): Promise<boolean> {
+  async refinance(fundId: number, sourceId: number, feeChargeRequests?: AddFeeChargeRequest[]): Promise<boolean> {
     const { error: debtError } = await this.supabase
       .from('debts')
       .update({ fund_id: sourceId })
@@ -90,8 +91,16 @@ export class FundRepository {
       .update({ refinance_date: new Date() })
       .eq("id", fundId);
 
-    if (debtError || fundError) {
-      console.error("Error refinancing fund:", debtError || fundError);
+    let feeChargeError;
+    if (feeChargeRequests && feeChargeRequests.length > 0) {
+      const { error: fcError } = await this.supabase
+        .from('fee_charges')
+        .insert(feeChargeRequests);
+      feeChargeError = fcError;
+    }
+
+    if (debtError || fundError || feeChargeError) {
+      console.error("Error refinancing fund:", debtError || fundError || feeChargeError);
       return false;
     }
     return true;

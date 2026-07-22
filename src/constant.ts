@@ -4,6 +4,7 @@ export const CHAT_STATE_EXPIRATION_MINUTES = 30;
 export const NOTIFY_MATURITY_DAYS_IN_DAYS = 5;
 export const SETTING_KEYS = {
   CHARGE_FEE_PERCENT: "charge_fee_percent",
+  NOTIFICATION_CHAT_ID: "notification_chat_id",
 }
 
 export enum FLOW_COMMANDS {

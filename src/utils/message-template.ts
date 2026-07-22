@@ -10,7 +10,7 @@ import { SelectOption } from "../types/select-option";
 export function createMatureFundListMessage(funds: Fund[]): string {
   const template = `💸 Các nguồn tiền sắp đến hạn:
 -------------------
-${funds.map((fund, i) => `  📆 <b>${fund.formatedName}</b>: ${fund.formatedTotalStatementDebtAmount} (Còn ${fund.untilMaturityDays} ngày)`).join("\n")}`;
+${funds.map((fund, i) => `  📆 <b>${fund.formatedName}</b>: ${fund.formatedTotalStatementDebtAmount} (${fund.maturityDayStatus})`).join("\n")}`;
   return template;
 }
 
@@ -47,8 +47,7 @@ export function createAddFundMessage(): string {
 1. Tên nguồn tiền
 2. Hạn mức (số tiền)
 3. Ngày đáo hạn
-4. Ngày sao kê (nếu có)
-5. Khoảng cách các kỳ sao kê (tháng - mặc định là 1)`;
+4. Ngày sao kê`;
 }
 
 export function createEditFundMessage(fund: Fund): string {
@@ -115,6 +114,15 @@ export function createConfirmAddFundMessage(data: AddFundRequest): string {
 2. Hạn mức (số tiền): <b>${formatCurrency(data.amount)}</b>
 3. Ngày đáo hạn: <b>${data.maturity_day}</b>
 4. Ngày sao kê: <b>${data.statement_day}</b>`;
+}
+
+export function createAllocationDebtMessage(contact: Contact, allocations: { debtId: number; fundName: string; currentAmount: number; newAmount: number; status: string }[]): string {
+  const template = `💸 Vui lòng xác nhận phân bổ thanh toán cho <b>${contact.name}</b>:
+-------------------
+${allocations.map((allocation, i) => {
+    return `   👤 ${allocation.fundName}: <b>${formatCurrency(allocation.currentAmount)}</b> -> <b>${formatCurrency(allocation.newAmount)}</b> ${allocation.status}`;
+  }).join("\n")}`;
+  return template;
 }
 
 export function createInvalidInputMessage(): string {

@@ -15,12 +15,7 @@
 	],
 	"triggers": {
     "crons": [
-      "0 12 * * *"
+      "0 5 * * *"
     ]
-  },
-	"vars": {
-    "SUPABASE_URL": "https://xgptsinsyytpfhyvvfcf.supabase.co",
-		"CONVERSATION_CHAT_ID": "6341881777",
-		"ADMIN_CHAT_ID": "6341881777"
   }
 }

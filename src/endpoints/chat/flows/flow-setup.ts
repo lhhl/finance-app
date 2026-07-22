@@ -9,6 +9,7 @@ import { ViewChargeFeeFlow } from "./setting/view-charge-fee-flow";
 import { RefinanceFundFlow } from "./fund/refinance-fund-flow";
 import { ContactDebtListFlow } from "./contact/contact-debt-list-flow";
 import { DeleteFundFlow } from "./fund/delete-fund-flow";
+import { PayDebtFlow } from "./debt/pay-debt-flow";
 
 export const FLOW_COMMANDS_LIST = {
   [FLOW_COMMANDS.LIST_FUND]: FundListFlow,
@@ -21,7 +22,7 @@ export const FLOW_COMMANDS_LIST = {
   [FLOW_COMMANDS.CHANGE_CHARGE_FEE]: ChangeChargeFeeFlow,
   [FLOW_COMMANDS.REFINANCE_FUND]: RefinanceFundFlow,
   [FLOW_COMMANDS.LIST_CONTACT_DEBTS]: ContactDebtListFlow,
-  [FLOW_COMMANDS.PAY_DEBT]: ContactDebtListFlow,
+  [FLOW_COMMANDS.PAY_DEBT]: PayDebtFlow,
 };
 
 export const FLOW_CUD = {

@@ -28,12 +28,12 @@ export function calculateStatementDate(statementDay: number, maturityStatementDi
 
 export function calculateDaysUntilStatement(statementDate: Date): number {
   const currentDate = new Date();
-  const dayDiff = statementDate.getDate() - currentDate.getDate();
-  return dayDiff;
+  const dayDiff = statementDate.getTime() - currentDate.getTime();
+  return Math.ceil(dayDiff / (1000 * 60 * 60 * 24));
 }
 
 export function calculateDaysUntilMaturity(maturityDate: Date): number {
   const currentDate = new Date();
-  const dayDiff = maturityDate.getDate() - currentDate.getDate();
-  return dayDiff;
+  const dayDiff = maturityDate.getTime() - currentDate.getTime();
+  return Math.ceil(dayDiff / (1000 * 60 * 60 * 24));
 }

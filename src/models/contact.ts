@@ -22,16 +22,17 @@ export class Contact {
     return formatCurrency(this.totalDebtAmount);
   }
 
-  allocateDebtPayment(amount: number): { debtId: number; newAmount: number; }[] {
+  allocateDebtPayment(amount: number): { debtId: number; fundName: string; currentAmount: number; newAmount: number; status: string }[] {
     let remainingAmount = amount;
-    const allocations: { debtId: number; newAmount: number; }[] = [];
-    const sortedDebts = this.debts.sort((a, b) => a.untilMaturityDays! - b.untilMaturityDays!);
+    const allocations: { debtId: number; fundName: string; currentAmount: number; newAmount: number; status: string }[] = [];
+    const filterdDebts = this.debts.filter(debt => debt.isInCurrentStatementPeriod);
+    const sortedDebts = filterdDebts.sort((a, b) => a.untilMaturityDays! - b.untilMaturityDays!);
 
     for (const debt of sortedDebts) {
-      if (remainingAmount <= 0) break;
+      // if (remainingAmount <= 0) break;
 
       const paymentAmount = Math.min(debt.amount, remainingAmount);
-      allocations.push({ debtId: debt.id, newAmount: debt.amount - paymentAmount });
+      allocations.push({ debtId: debt.id, fundName: debt.funds ? debt.funds.name : '', currentAmount: debt.amount, newAmount: debt.amount - paymentAmount, status: debt.funds ? `(${debt.funds.maturityDayStatus})` : '' });
       remainingAmount -= paymentAmount;
     }
 

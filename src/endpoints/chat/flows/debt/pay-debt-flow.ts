@@ -1,6 +1,6 @@
 import { ChatContext } from "../../../../types/chat-context";
 import { FlowStepResult } from "../../../../types/flow";
-import { createContactDebtMessage, createErrorInputMessage, createInputMessage, createNotFoundMessage, createSelectOptionMessage, createConfirmMessage, createErrorMessage, createInvalidInputMessage, createSuccessMessage } from "../../../../utils/message-template";
+import { createContactDebtMessage, createErrorInputMessage, createInputMessage, createNotFoundMessage, createSelectOptionMessage, createConfirmMessage, createErrorMessage, createInvalidInputMessage, createSuccessMessage, createAllocationDebtMessage } from "../../../../utils/message-template";
 import { Debt } from "../../../../models/debt";
 import { Flow } from "../flow";
 import { CALLBACK_COMMANDS, FLOW_COMMANDS } from "../../../../constant";
@@ -8,10 +8,12 @@ import { ContactRepository } from "../../../../repositories/contact-repository";
 import { InputIntegerRequest } from "../../../../models/input-integer-request";
 import { SelectOption } from "../../../../types/select-option";
 import { DebtRepository } from "../../../../repositories/debt-repository";
+import { formatCurrency } from "../../../../utils/format";
+import { generateConfirmButtons } from "../../../../utils/generate";
 
-export class ContactDebtListFlow extends Flow {
-  steps = [this.listContact];
-  flowCommand = FLOW_COMMANDS.LIST_CONTACT_DEBTS;
+export class PayDebtFlow extends Flow {
+  steps = [this.listContact, this.inputAmount, this.confirm, this.showAllocation, this.payDebt];
+  flowCommand = FLOW_COMMANDS.PAY_DEBT;
   flowName = "thanh toán khoản vay";
   contactRepository: ContactRepository;
   debtRepository: DebtRepository;
@@ -66,7 +68,7 @@ export class ContactDebtListFlow extends Flow {
     const contactId = this.context.state!.data!['contactId'];
     const amount = this.context.state!.data!['contactAmount'];
     const contact = selectOptions.find(option => option.id === contactId);
-    const request = new InputIntegerRequest(this.text, 100000, this.context.state!.data!['contactAmount']);
+    const request = new InputIntegerRequest(this.text, 100000, amount);
     const rs = request.validate();
     if (!rs.isValid) {
       return {
@@ -75,17 +77,19 @@ export class ContactDebtListFlow extends Flow {
       };
     }
 
-    const message = createConfirmMessage(`thanh toán ${amount} cho ${contact?.name}`);
+    const message = createConfirmMessage(`thanh toán <b>${formatCurrency(request.intValue)}</b> cho <b>${contact?.name}</b>`);
+    this.context.state!.data!['paymentAmount'] = request.intValue;
     return {
       success: true,
-      messages: [message]
+      messages: [message],
+      buttons: generateConfirmButtons(),
     };
   }
 
-  async pay(): Promise<FlowStepResult> {
+  async showAllocation(): Promise<FlowStepResult> {
     if (this.text == CALLBACK_COMMANDS.CONFIRM) {
       const contactId = this.context.state!.data!['contactId'];
-      const amount = this.context.state!.data!['contactAmount'];
+      const amount = this.context.state!.data!['paymentAmount'];
       
       const contact = await this.contactRepository.detail(contactId);
       const allocation = contact?.allocateDebtPayment(amount);
@@ -95,14 +99,29 @@ export class ContactDebtListFlow extends Flow {
           messages: [createNotFoundMessage('khoản thanh toán vay')],
         };
       }
+      this.context.state!.data!['allocation'] = allocation;
 
-      allocation.forEach(async (item) => {
+      return {
+        success: true,
+        messages: [createAllocationDebtMessage(contact!,allocation)],
+        buttons: generateConfirmButtons(),
+      };
+    }
+    return {
+      success: false,
+      messages: [createInvalidInputMessage()],
+    };
+  }
+
+  async payDebt(): Promise<FlowStepResult> {
+    if (this.text == CALLBACK_COMMANDS.CONFIRM) {
+      const allocation = this.context.state!.data!['allocation'];
+      allocation.forEach(async (item: { debtId: number; currentAmount: number; newAmount: number; }) => {
         if (item.newAmount == 0) {
           return await this.debtRepository.delete(item.debtId);
         }
         return await this.debtRepository.update(item.debtId, { amount: item.newAmount });
       });
-
       return {
         success: true,
         messages: [createSuccessMessage(this.flowName)],

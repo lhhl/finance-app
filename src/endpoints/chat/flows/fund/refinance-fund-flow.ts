@@ -103,7 +103,7 @@ export class RefinanceFundFlow extends Flow {
     if (!selectFund) {
       return {
         success: false,
-        messages: [createNotFoundMessage('nguồn tiền khả dụng')],
+        messages: [createNotFoundMessage('nguồn tiền khả dụng để thanh toán')],
       };
     }
 
@@ -113,6 +113,7 @@ export class RefinanceFundFlow extends Flow {
     selectFund.debts?.forEach(debt => {
       debt.funds!.refinance_percent = currentValue;
     });
+    this.context.state!.data!['feeChargeRequests'] = selectFund.debtFeeChargeRequests;
 
     return {
       success: true,
@@ -131,7 +132,7 @@ export class RefinanceFundFlow extends Flow {
           messages: [createInvalidInputMessage()],
         };
       }
-      const result = await this.fundRepository.refinance(fundId, sourceId);
+      const result = await this.fundRepository.refinance(fundId, sourceId, this.context.state!.data?.feeChargeRequests);
       if (result) {
         return {
           success: true,

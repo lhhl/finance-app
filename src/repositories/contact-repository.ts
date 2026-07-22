@@ -9,7 +9,10 @@ export class ContactRepository {
       .from(this.tableName)
       .select(`
         *,
-        debts (*)
+        debts (
+          *,
+          funds (name)
+        )
       `);
 
       console.log("Fetched debts:", data); // Log the fetched data for debugging

@@ -2,6 +2,8 @@ import { calculateMaturityDate, calculateStatementDate, calculateDaysUntilStatem
 import { formatCurrency, formatDate } from "../utils/format";
 import { Debt } from "./debt";
 import { Contact } from "./contact";
+import { FeeCharge } from "./fee-charges";
+import { AddFeeChargeRequest } from "./add-fee-charge-request";
 
 export class Fund {
   id: number;
@@ -111,13 +113,23 @@ export class Fund {
     return calculateDaysUntilMaturity(this.maturityDate);
   }
 
+  get maturityDayStatus(): string {
+    if (this.untilMaturityDays > 0) {
+      return `Còn ${this.untilMaturityDays} ngày đến đáo hạn`;
+    }
+    if (this.untilMaturityDays === 0) {
+      return "Đáo hạn hôm nay";
+    }
+    return `Đã quá hạn ${-this.untilMaturityDays} ngày`;
+  }
+
   get status(): string {
     if (this.untilStatementDays <= 0) {
       if (this.isRefinanced) {
         return "🟢 Đã đáo hạn";
       }
-      if (!this.canRefinance) {
-        return `🟤 Không cần đáo hạn`
+      if (this.totalStatementDebtAmount == 0) {
+        return `🟤 Không cần đáo hạn`;
       }
       if (this.untilMaturityDays > 0) {
         return `🔵 Còn ${this.untilMaturityDays} ngày đến đáo hạn`;
@@ -138,5 +150,14 @@ export class Fund {
       return "Sao kê hôm nay";
     }
     return `Sao kê ${-this.untilStatementDays} ngày trước`;
+  }
+
+  get debtFeeChargeRequests(): AddFeeChargeRequest[] {
+    return this.debts?.map(debt => ({
+      amount: debt.refinanceFee,
+      debt_id: debt.id,
+      fund_id: this.id,
+      contact_id: debt.debt_contacts?.id || 0,
+    })) || [];
   }
 }
