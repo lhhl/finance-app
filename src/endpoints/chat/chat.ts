@@ -24,7 +24,7 @@ export async function chat(c: Context, body: TelegramMessagePayload) {
 	const chatContext: ChatContext = await state({
 		chatId,
 		authorId: senderId,
-		sendMessage: await createMessageContext(c.env.TELEGRAM_BOT_TOKEN, chatId.toString()),
+		sendMessage: await createMessageContext(c.env.TELEGRAM_BOT_TOKEN, [chatId.toString()]),
 		supabase: await createSupabaseContext(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_ROLE_KEY),
 	});
 

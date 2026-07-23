@@ -6,6 +6,6 @@ export interface ChatContext {
   chatId: number;
   authorId?: number;
   state?: ChatState;
-  sendMessage: (message: string, button?: TelegramButton[]) => Promise<Response>;
+  sendMessage: (message: string, button?: TelegramButton[]) => Promise<void>;
   supabase: SupabaseClient;
 }

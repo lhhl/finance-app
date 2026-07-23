@@ -60,8 +60,9 @@ export class DebtAllocationFlow extends Flow {
     const funds = await this.getAvailableFunds(debtAmount);
     if (funds.length === 0) {
       return {
-        success: false,
-        messages: [createNotFoundMessage(this.flowName)],
+        success: true,
+        stepAdded: 10,
+        messages: [createNotFoundMessage(`nguồn tiền để ${this.flowName}`)],
       };
     }
     return {

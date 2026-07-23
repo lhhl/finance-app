@@ -124,7 +124,7 @@ export class Fund {
   }
 
   get status(): string {
-    if (this.untilStatementDays <= 0) {
+    if (this.untilStatementDays < 0) {
       if (this.isRefinanced) {
         return "🟢 Đã đáo hạn";
       }
@@ -138,6 +138,9 @@ export class Fund {
       } else {
         return "🟣 Đã quá hạn";
       }
+    }
+    if (this.untilStatementDays === 0) {
+      return "🟠 Sao kê hôm nay";
     }
     return `🟡 Còn ${this.untilStatementDays} ngày đến sao kê`;
   }
@@ -158,6 +161,7 @@ export class Fund {
       debt_id: debt.id,
       fund_id: this.id,
       contact_id: debt.debt_contacts?.id || 0,
+      maturity_date: this.maturityDate,
     })) || [];
   }
 }

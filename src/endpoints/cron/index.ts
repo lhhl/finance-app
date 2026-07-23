@@ -9,11 +9,12 @@ export async function scheduled(event: any, env: any, ctx: any) {
   console.log(event.cron);
   console.log("Scheduled event triggered:", event);
   const supabaseClient = await createSupabaseContext(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-  const notifyChatId = await new SettingRepository(supabaseClient).get(SETTING_KEYS.NOTIFICATION_CHAT_ID);
+  const notifyChatIdStr = await new SettingRepository(supabaseClient).get(SETTING_KEYS.NOTIFICATION_CHAT_ID);
+  const notifyChatIds = notifyChatIdStr?.value?.split(",").map(id => id.trim());
 
   const cronContext: CronContext = {
     supabase: supabaseClient,
-    sendMessage: notifyChatId?.value ? await createMessageContext(env.TELEGRAM_BOT_TOKEN, notifyChatId?.value) : undefined,
+    sendMessage: notifyChatIds?.length ? await createMessageContext(env.TELEGRAM_BOT_TOKEN, notifyChatIds) : undefined,
   };
 
 

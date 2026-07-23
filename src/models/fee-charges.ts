@@ -9,6 +9,7 @@ export class FeeCharge {
   debts?: Debt;
   funds?: Fund;
   contact?: Contact;
+  maturity_date: Date;
 
   constructor(feeCharge: FeeCharge) {
     this.id = feeCharge.id;
@@ -16,5 +17,6 @@ export class FeeCharge {
     this.debts = feeCharge.debts ? new Debt(feeCharge.debts) : undefined;
     this.funds = feeCharge.funds ? new Fund(feeCharge.funds) : undefined;
     this.contact = feeCharge.contact ? new Contact(feeCharge.contact) : undefined;
+    this.maturity_date = new Date(feeCharge.maturity_date);
   }
 }
