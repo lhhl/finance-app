@@ -2,6 +2,7 @@ import { calculateMaturityDate, calculateDaysUntilMaturity } from "../utils/calc
 import { formatCurrency, formatDate } from "../utils/format";
 import { Fund } from "./fund";
 import { Contact } from "./contact";
+import { FeeCharge } from "./fee-charges";
 
 export class Debt {
   id: number;

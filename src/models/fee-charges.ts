@@ -19,4 +19,12 @@ export class FeeCharge {
     this.contact = feeCharge.contact ? new Contact(feeCharge.contact) : undefined;
     this.maturity_date = new Date(feeCharge.maturity_date);
   }
+
+  get formatedAmount(): string {
+    return formatCurrency(this.amount);
+  }
+
+  get formatedMaturityDate(): string {
+    return formatDate(this.maturity_date);
+  }
 }

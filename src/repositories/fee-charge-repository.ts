@@ -9,7 +9,11 @@ export class FeeChargeRepository {
   async list(): Promise<FeeCharge[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*");
+      .select(`
+        *,
+        funds (name),
+        debt_contacts (name)
+        `);
 
     if (error) {
       console.error("Error fetching fee charges:", error);

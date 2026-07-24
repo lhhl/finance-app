@@ -31,8 +31,12 @@ export class DebtAllocationFlow extends Flow {
     const funds = await this.fundRepository.list();
     const filterFunds = funds.filter((a) => a.isAvailableForAmount(debtAmount));
     const sortedFunds = filterFunds.sort((a, b) => {
-      if (a.untilStatementDays === undefined) return -1;
-      if (b.untilStatementDays === undefined) return 1;
+      const aIsOverdue = a.untilStatementDays < 0;
+      const bIsOverdue = b.untilStatementDays < 0;
+      
+      if (aIsOverdue && !bIsOverdue) return -1;
+      if (!aIsOverdue && bIsOverdue) return 1;
+      
       return b.untilStatementDays - a.untilStatementDays;
     });
     return sortedFunds;

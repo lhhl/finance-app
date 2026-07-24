@@ -1,4 +1,5 @@
 import { Context }	from "hono";
+import { responseCallbackAction } from "../../utils/action";
 import { TelegramMessagePayload } from "../../types/telegram";
 import { command } from "./command";
 import { assistant } from "./assistant";
@@ -14,7 +15,11 @@ export async function chat(c: Context, body: TelegramMessagePayload) {
 	const senderId = body.message?.from?.id || body.callback_query?.from?.id;
 	const chatId = body.message?.chat?.id || body.callback_query?.message?.chat?.id;
 	const text = body.message?.text || body.callback_query?.data;
+	const callbackQueryId = body.callback_query?.id;
 	console.log(`From ${senderId} in ${chatId}: ${text}`);
+	console.log(`Callback query ID: ${callbackQueryId}`);
+
+	callbackQueryId && await responseCallbackAction(c.env.TELEGRAM_BOT_TOKEN, callbackQueryId);
 
 	if (!chatId || !text) {
 		console.error("Missing chatId or text in the request body.");

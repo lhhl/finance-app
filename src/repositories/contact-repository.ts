@@ -78,4 +78,23 @@ export class ContactRepository {
     }
     return true;
   }
+
+  async getFeeCharges(): Promise<Contact[]> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select(`
+        *,
+        fee_charges (
+          *,
+          funds (name)
+        )
+      `)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching fee charges:", error);
+      return [];
+    }
+    return data.map(contact => new Contact(contact));
+  }
 }

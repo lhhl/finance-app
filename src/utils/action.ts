@@ -1,6 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 import { TelegramButton } from "../types/telegram";
 
+export async function responseCallbackAction(token: string, callbackQueryId: string) {
+  return await fetch(
+    `https://api.telegram.org/bot${token}/answerCallbackQuery`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        callback_query_id: callbackQueryId,
+      }),
+    }
+  );
+}
+
 export async function createMessageContext(token: string, chatIds: string[]) {
   return async (message: string, button?: TelegramButton[]) => await Promise.all(chatIds.map(async (chatId) => await fetch(
     `https://api.telegram.org/bot${token}/sendMessage`,

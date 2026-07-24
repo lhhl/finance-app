@@ -6,34 +6,54 @@ import type { ValidationError } from "../types/error";
 import { Debt } from "../models/debt";
 import { Contact } from "../models/contact";
 import { SelectOption } from "../types/select-option";
+import { FeeCharge } from "../models/fee-charges";
 
 export function createMatureFundListMessage(funds: Fund[]): string {
   const template = `💸 Các nguồn tiền sắp đến hạn:
--------------------
+______________________\n
 ${funds.map((fund, i) => `  📆 <b>${fund.formatedName}</b>: ${fund.formatedTotalStatementDebtAmount} (${fund.maturityDayStatus})`).join("\n")}`;
   return template;
 }
 
-export function createFundListMessage(fund: Fund): string {
-  const template = `💵 <b>${fund.formatedName}</b>
+export function createFundOverview(totalAvailable: string, totalDebt: string, totalDebtInStatement: string): string {
+  const template = `📣 Thống kê nguồn tiền:
+  💶 Tổng khả dụng: <b>${totalAvailable}</b>
+  💸 Tổng nợ: <b>${totalDebt}</b>
+  📆 Tổng nợ đến hạn: <b>${totalDebtInStatement}</b>`;
+  return template;
+}
+
+export function createFundListMessage(funds: Fund[]): string {
+  const template = funds.map(fund => `💵 <b>${fund.formatedName}</b>
   📆 Dư nợ: <b>${fund.formatedTotalDebtAmount}</b>
   💸 Sao kê: <b>${fund.formatedTotalStatementDebtAmount}</b>
+  💶 Khả dụng: <b>${fund.formatedAvailableAmount}</b>
   <b>${fund.status}</b>
--------------------`;
+______________________\n`).join("\n");
   return template;
 }
 
 export function createFundDetailMessage(fund: Fund): string {
   const template = `💵 <b>${fund.formatedName}</b>
   🪎 Hạn mức: <b>${fund.formatedAmount}</b>
-  💶 Còn lại: <b>${fund.formatedAvalableAmount}</b>
+  💶 Còn lại: <b>${fund.formatedAvailableAmount}</b>
   ${fund.statementDateString ? `🗓️ Ngày sao kê: <b>${fund.statementDateString}</b>` : ""}
   🗓️ Ngày đáo hạn: <b>${fund.maturityDateString}</b>
   📆 Sao kê kỳ này: <b>${fund.formatedTotalStatementDebtAmount}</b>
   <b>${fund.status}</b>
-${fund.debts!.length > 0 ? `-------------------
+${fund.debts!.length > 0 ? `______________________\n
   💸 Tổng các khoản vay: <b>${fund.formatedTotalDebtAmount}</b>
 ${fund.debts!.map((debt) => `   👤 ${debt.debt_contacts!.name}: <b>${debt.formatedAmount}</b> (${debt.createdAtString})`).join("\n")}` : ''}`;
+  return template;
+}
+
+export function createChargeFeeMessage(contacts: Contact[]): string {
+  const template = `📒 Các khoản nợ phí:
+______________________\n
+${contacts.map(contact => `👤 ${contact.name}: <b>${contact.formatedTotalFeeChargeAmount}</b>
+${contact.fee_charges.map(feeCharge => `   🔸 <b>${feeCharge.formatedAmount}</b>: ${feeCharge.formatedMaturityDate} (${feeCharge.funds?.formatedName})`).join("\n")}
+______________________
+`).join("\n")}`;
   return template;
 }
 
@@ -62,10 +82,10 @@ export function createFundRefinanceMessage(fund: Fund): string {
   const template = `💵 <b>${fund.formatedName}</b>
   🪎 Hạn mức: <b>${fund.formatedAmount}</b>
   💸 Tổng nợ vay: <b>${fund.formatedTotalDebtAmount}</b>
-  💶 Còn lại: <b>${fund.formatedAvalableAmount}</b>
+  💶 Còn lại: <b>${fund.formatedAvailableAmount}</b>
   <b>${fund.status}</b> (${fund.maturityDateString})
   📣 Nguồn tiền sẽ được đáo hạn với phí <b>${fund.refinance_percent}%</b>: ${fund.formatedRefinanceFeeString}
-${fund.statementDebts.length > 0 ? `-------------------
+${fund.statementDebts.length > 0 ? `______________________\n
   💸 Các khoản vay trong sao kê: <b>${fund.formatedTotalStatementDebtAmount}</b>
 ${fund.statementDebts!.map((debt) => `      👤 ${debt.debt_contacts!.name}: <b>${debt.formatedAmount}</b> (${debt.createdAtString}) - Phí: <b>${debt.formatedRefinanceFeeString}</b>`).join("\n")}` : ''}`;
   return template;
@@ -86,25 +106,25 @@ export function createSelectMessage(name: string): string {
 
 export function createSelectOptionMessage(name: string, options: SelectOption[]): string {
   return `🔎 Vui lòng nhập số thứ tự ${name}:
--------------------
+______________________\n
 ${options.map((option, i) => `${i + 1}. ${option.name}`).join("\n")}`;
 }
 
 export function createAvailFundsMessage(funds: Fund[]): string {
   return `✳️ Các nguồn tiền khả dụng:
--------------------
-${funds.map((fund, i) => `${i + 1}. ${fund.formatedName} - ${fund.formatedAvalableAmount}: ${fund.statementDaysStatus}`).join("\n")}`;
+______________________\n
+${funds.map((fund, i) => `${i + 1}. <b>${fund.formatedName}</b> - <b>${fund.formatedAvailableAmount}</b>: ${fund.statementDaysStatus}`).join("\n")}`;
 }
 
 export function createSelectFundMessage(funds: Fund[]): string {
   return `🔎 Vui lòng chọn số thứ tự nguồn tiền:
--------------------
+______________________\n
 ${funds.map((fund, i) => `${i + 1}. ${fund.formatedName}`).join("\n")}`;
 }
 
 export function createSelectContactMessage(contacts: Contact[]): string {
   return `🔎 Vui lòng chọn số thứ tự người vay:
--------------------
+______________________\n
 ${contacts.map((contact, i) => `${i + 1}. ${contact.name}`).join("\n")}`;
 }
 
@@ -118,7 +138,7 @@ export function createConfirmAddFundMessage(data: AddFundRequest): string {
 
 export function createAllocationDebtMessage(contact: Contact, allocations: { debtId: number; fundName: string; currentAmount: number; newAmount: number; status: string }[]): string {
   const template = `💸 Vui lòng xác nhận phân bổ thanh toán cho <b>${contact.name}</b>:
--------------------
+______________________\n
 ${allocations.map((allocation, i) => {
     return `   👤 ${allocation.fundName}: <b>${formatCurrency(allocation.currentAmount)}</b> -> <b>${formatCurrency(allocation.newAmount)}</b> ${allocation.status}`;
   }).join("\n")}`;

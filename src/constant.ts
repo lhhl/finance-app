@@ -20,6 +20,7 @@ export enum FLOW_COMMANDS {
   REFINANCE_FUND = "/daohan",
   LIST_CONTACT_DEBTS = "/khoanvay",
   PAY_DEBT = "/thanhtoanvay",
+  CHARGE_FEE = "/nophi",
 }
 
 export enum CALLBACK_COMMANDS {

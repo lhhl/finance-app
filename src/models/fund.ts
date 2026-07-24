@@ -34,7 +34,7 @@ export class Fund {
   }
 
   isAvailableForAmount(amount: number): boolean {
-    return this.avalableAmount >= amount && this.untilStatementDays < 0;
+    return this.availableAmount >= amount;
   }
 
   get refinanceFee(): number {
@@ -58,8 +58,8 @@ export class Fund {
     return formatCurrency(this.amount);
   }
 
-  get formatedAvalableAmount(): string {
-    return formatCurrency(this.avalableAmount);
+  get formatedAvailableAmount(): string {
+    return formatCurrency(this.availableAmount);
   }
 
   get formatedTotalStatementDebtAmount(): string {
@@ -70,7 +70,7 @@ export class Fund {
     return formatCurrency(this.totalDebtAmount);
   }
 
-  get avalableAmount(): number {
+  get availableAmount(): number {
     return this.amount - this.totalDebtAmount;
   }
 
@@ -147,7 +147,7 @@ export class Fund {
 
   get statementDaysStatus(): string {
     if (this.untilStatementDays > 0) {
-      return `Chưa đến sao kê`;
+      return `Còn ${this.untilStatementDays} ngày đến sao kê`;
     }
     if (this.untilStatementDays === 0) {
       return "Sao kê hôm nay";
